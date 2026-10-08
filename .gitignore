@@ -1,19 +1,24 @@
+# Compilados de Maven
 target/
-!.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
-.kotlin
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
 
-### IntelliJ IDEA ###
-.idea/modules.xml
-.idea/jarRepositories.xml
-.idea/compiler.xml
-.idea/libraries/
+# Archivos de configuración de IntelliJ IDEA
+.idea/
 *.iws
 *.iml
 *.ipr
+out/
+gen/
 
-### Eclipse ###
+# Archivos de configuración de Eclipse
 .apt_generated
 .classpath
 .factorypath
@@ -21,20 +26,18 @@ target/
 .settings
 .springBeans
 .sts4-cache
+bin/
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
-
-### VS Code ###
+# Archivos de configuración de VS Code
 .vscode/
 
-### Mac OS ###
+# Archivos de Sistema Operativo
 .DS_Store
-.idea/
+Thumbs.db
+desktop.ini
+
+# Logs y temporales
+*.log
+*.tmp
+*.bak
+*.swp
