@@ -2,21 +2,12 @@ package vista;
 
 import java.awt.EventQueue;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
 import controlador.logica_ventana;
 
-import javax.swing.JLabel;
 import java.awt.Font;
-import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JButton;
-import javax.swing.JList;
 
 public class ventana extends JFrame {
 
@@ -52,7 +43,6 @@ public class ventana extends JFrame {
 	        }
 	    });
 	}
-
 	/**
 	 * Create the frame.
 	 */
@@ -147,8 +137,25 @@ public class ventana extends JFrame {
 		contentPane.add(btn_eliminar);
 		
 		lst_contactos = new JList(); // Crea una nueva JList para mostrar la lista de contactos.
-		lst_contactos.setFont(new Font("Tahoma", Font.PLAIN, 15)); // Configura la fuente de la JList.
+		lst_contactos.setFont(new Font("Consolas", Font.PLAIN, 14)); // Configura la fuente a una monoespaciada para que se alinee como tabla.
 		lst_contactos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION); // Establece el modo de selección a un solo elemento.
+		
+		// Renderizador personalizado para poner el encabezado en negrita y evitar que se pinte de azul
+		lst_contactos.setCellRenderer(new DefaultListCellRenderer() {
+			@Override
+			public java.awt.Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+				java.awt.Component c = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+				if (index == 0) {
+					c.setFont(c.getFont().deriveFont(Font.BOLD)); // Negrita para el encabezado
+					if (isSelected) {
+						setBackground(list.getBackground()); // Quita el fondo azul
+						setForeground(list.getForeground()); // Quita las letras blancas
+					}
+				}
+				return c;
+			}
+		});
+
 		lst_contactos.setBounds(25, 242, 971, 398); // Establece la posición y el tamaño de la JList en el panel.
 
 		scrLista = new JScrollPane(lst_contactos); // Crea un JScrollPane para permitir el desplazamiento de la JList.
