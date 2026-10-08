@@ -47,7 +47,7 @@ public class logica_ventana implements ActionListener, ListSelectionListener, It
 	}
 
 	// Método privado para inicializar las variables con los valores ingresados en la GUI.
-	private void incializacionCampos() {
+	private void inicializacionCampos() {
 		// Obtiene el texto ingresado en los campos de nombres, email y teléfono de la GUI.
 		nombres = delegado.txt_nombres.getText();
 		email = delegado.txt_email.getText();
@@ -60,7 +60,12 @@ public class logica_ventana implements ActionListener, ListSelectionListener, It
 		        // Lee los contactos almacenados utilizando una instancia de personaDAO.
 		        contactos = new personaDAO(new persona()).leerArchivo();
 		        DefaultListModel modelo = new DefaultListModel();
-		        // Agrega cada contacto al modelo de la lista de contactos de la GUI.
+		        
+		        // INYECTAMOS EL ENCABEZADO (Fila 0)
+		        String encabezado = String.format("%-10s%-40s%-40s%-40s%-40s", "ID", "NOMBRES", "TELÉFONO", "EMAIL", "CATEGORÍA");
+		        modelo.addElement(encabezado);
+
+		        // Agrega cada contacto al modelo de la lista
 		        for (persona contacto : contactos) {
 		            modelo.addElement(contacto.formatoLista());
 		        }
@@ -85,7 +90,7 @@ public class logica_ventana implements ActionListener, ListSelectionListener, It
 	    delegado.chb_favorito.setSelected(favorito);
 	    delegado.cmb_categoria.setSelectedIndex(0);
 	    // Reinicia las variables con los valores actuales de la GUI.
-	    incializacionCampos();
+	    inicializacionCampos();
 	    // Recarga los contactos en la lista de contactos de la GUI.
 	    cargarContactosRegistrados();
 	}
@@ -93,7 +98,7 @@ public class logica_ventana implements ActionListener, ListSelectionListener, It
 	// Método que maneja los eventos de acción (clic) en los botones.
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		incializacionCampos(); // Inicializa las variables con los valores actuales de la GUI.
+		inicializacionCampos(); // Inicializa las variables con los valores actuales de la GUI.
 
 	    // Verifica si el evento proviene del botón "Agregar".
 	    if (e.getSource() == delegado.btn_add) {
@@ -101,10 +106,19 @@ public class logica_ventana implements ActionListener, ListSelectionListener, It
 	        if ((!nombres.equals("")) && (!telefono.equals("")) && (!email.equals(""))) {
 	            // Verifica si se ha seleccionado una categoría válida.
 	            if ((!categoria.equals("Elija una Categoria")) && (!categoria.equals(""))) {
-	                // Crea un nuevo objeto persona con los datos ingresados y lo guarda.
-	                persona = new persona(nombres, telefono, email, categoria, favorito);
-	                new personaDAO(persona).escribirArchivo();
-	                // Limpia los campos después de agregar el contacto.
+	                // Calcula el nuevo ID (como base de datos)
+	                int nuevoId = 1;
+	                if (contactos != null && !contactos.isEmpty()) {
+	                    nuevoId = contactos.get(contactos.size() - 1).getId() + 1;
+	                }
+	                // Crea un nuevo objeto persona con los datos ingresados y el ID y lo guarda.
+	                persona = new persona(nuevoId, nombres, telefono, email, categoria, favorito);
+                    try {
+                        new personaDAO(persona).escribirArchivo();
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                    // Limpia los campos después de agregar el contacto.
 	                limpiarCampos();
 	                // Muestra un mensaje de éxito.
 	                JOptionPane.showMessageDialog(delegado, "Contacto Registrado!!!");
@@ -117,9 +131,50 @@ public class logica_ventana implements ActionListener, ListSelectionListener, It
 	            JOptionPane.showMessageDialog(delegado, "Todos los campos deben ser llenados!!!");
 	        }
 	    } else if (e.getSource() == delegado.btn_eliminar) {
-	        // Lugar para implementar la funcionalidad de eliminar un contacto.
-	    } else if (e.getSource() == delegado.btn_modificar) {
-	        // Lugar para implementar la funcionalidad de modificar un contacto.
+			int index = delegado.lst_contactos.getSelectedIndex();
+			// Ignoramos el índice 0 porque es el encabezado
+			if (index > 0) {
+				try {
+					contactos.remove(index - 1);
+					new personaDAO(new persona()).actualizarContactos(contactos);
+					limpiarCampos();
+					JOptionPane.showMessageDialog(delegado, "Eliminado con Éxito");
+
+				} catch (Exception ex) {
+					JOptionPane.showMessageDialog(delegado, "Error al eliminar el contacto", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+
+			} else {
+				JOptionPane.showMessageDialog(delegado, "Por favor seleccione un contacto de la lista para eliminar.");
+			}
+
+
+		} else if (e.getSource() == delegado.btn_modificar) {
+			int index = delegado.lst_contactos.getSelectedIndex();
+			// Ignoramos el índice 0 porque es el encabezado
+			if (index > 0) {
+				if ((!nombres.equals("")) && (!telefono.equals("")) && (!email.equals(""))) {
+					if ((!categoria.equals("Elija una Categoria")) && (!categoria.equals(""))) {
+						try {
+							int idOriginal = contactos.get(index - 1).getId();
+							persona contratoModificado = new persona(idOriginal, nombres, telefono, email, categoria, favorito);
+
+							contactos.set(index - 1, contratoModificado);
+							new personaDAO(new persona()).actualizarContactos(contactos);
+							limpiarCampos();
+							JOptionPane.showMessageDialog(delegado, "Modificado con Éxito");
+						} catch (Exception ex) {
+							JOptionPane.showMessageDialog(delegado, "Error al modificar el contacto", "Error", JOptionPane.ERROR_MESSAGE);
+						}
+					} else {
+						JOptionPane.showMessageDialog(delegado, "Elija una Categoria!!!");
+					}
+				} else {
+					JOptionPane.showMessageDialog(delegado, "Todos los campos deben ser llenados!!!");
+				}
+			} else {
+				JOptionPane.showMessageDialog(delegado, "Por favor seleccione un contacto de la lista para modificar.");
+			}
 	    }
 	}
 
@@ -130,10 +185,11 @@ public class logica_ventana implements ActionListener, ListSelectionListener, It
 	    int index = delegado.lst_contactos.getSelectedIndex();
 	    // Verifica si se ha seleccionado un índice válido en la lista.
 	    if (index != -1) {
-	        // Si el índice es mayor que cero (no se seleccionó la primera fila),
-	        // carga los detalles del contacto seleccionado.
-	        if (index > 0) {
-	            cargarContacto(index);
+	        // Si hace clic en el encabezado (índice 0), quitamos la selección azul para que parezca un título real
+	        if (index == 0) {
+	            delegado.lst_contactos.clearSelection();
+	        } else if (index > 0) {
+	            cargarContacto(index - 1);
 	        }
 	    } 
 	}

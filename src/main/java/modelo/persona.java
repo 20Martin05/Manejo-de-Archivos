@@ -4,6 +4,7 @@ package modelo;
 public class persona {
 	
 	// Declaración de variables privadas de la clase "persona"
+	private int id;
 	private String nombre, telefono, email, categoria;
 	private boolean favorito;
 	
@@ -11,6 +12,7 @@ public class persona {
 	public persona() {
 		super(); // Llama al constructor de la clase base (Object)
 		//Inicializa las varaibles 
+		this.id = 0;
 		this.nombre = "";
 		this.telefono = "";
 		this.email = "";
@@ -18,14 +20,23 @@ public class persona {
 		this.favorito = false;
 	}
 	// Constructor público de la clase "persona" que incializa todos los campos 
-	public persona(String nombre, String telefono, String email, String categoria, boolean favorito) {
+	public persona(int id, String nombre, String telefono, String email, String categoria, boolean favorito) {
 		super();// Llama al constructor de la clase base (Object)
 		//Incializa las variables con los valores enviado por los argumentos
+		this.id = id;
 		this.nombre = nombre;
 		this.telefono = telefono;
 		this.email = email;
 		this.categoria = categoria;
 		this.favorito = favorito;
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
 	}
 	
 	// Método público para obtener el valor de "nombre"
@@ -82,15 +93,13 @@ public class persona {
 	
 	// Método para proveer un formato para almacenar en un archivo
 	public String datosContacto() {
-		
-		// Estructurar el siguiente formato: nombre;telefono;email;categoria;favorito
-		// Por ejemplo: Daniela Poma;097145478;dpoma2024@gmail.com;amigo;true
-		String contacto = String.format("%s;%s;%s;%s;%s", nombre, telefono, email, categoria, favorito); // Crea una cadena formateada con los valores de las variables
+		// Estructurar el siguiente formato: id;nombre;telefono;email;categoria;favorito
+		String contacto = String.format("%d;%s;%s;%s;%s;%s", id, nombre, telefono, email, categoria, favorito);
 		return contacto; // Retorna la cadena formateada
 	}
 	//Método para proveer el formato de los campos que se van a imprimir en la lista
 	public String formatoLista() {
-		String contacto= String.format("%-40s%-40s%-40s%-40s", nombre, telefono, email, categoria);
+		String contacto = String.format("%-10d%-40s%-40s%-40s%-40s", id, nombre, telefono, email, categoria);
 		return contacto;
 	}
 
