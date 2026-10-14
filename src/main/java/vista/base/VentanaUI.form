@@ -143,11 +143,10 @@
                 <properties/>
                 <border type="none"/>
                 <children>
-                  <component id="lst_contactos" class="javax.swing.JList" binding="lst_contactos">
+                  <component id="32c04" class="javax.swing.JTable" binding="lst_contactos">
                     <constraints/>
                     <properties>
-                      <font name="Consolas" size="14" style="0"/>
-                      <selectionMode value="0"/>
+                      <autoCreateRowSorter value="true"/>
                     </properties>
                   </component>
                 </children>
