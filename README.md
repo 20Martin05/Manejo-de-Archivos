@@ -10,10 +10,10 @@ El desarrollo aplica el patrón de arquitectura **MVC (Modelo-Vista-Controlador)
 
 * **CRUD Completo:** Creación, lectura, actualización y eliminación de registros (Create, Read, Update, Delete).
 * **Persistencia en Texto Plano:** La información se guarda y recupera desde un archivo local (`datosContactos.csv`).
-* **Identificadores Únicos (IDs):** Algoritmo de auto-incremento de Llaves Primarias para cada contacto.
+* **Identificadores Únicos (ID):** Algoritmo de auto-incremento de Llaves Primarias para cada contacto.
 * **Patrón de Arquitectura MVC:** Separación estricta de la interfaz gráfica (`vista`), lógica y eventos (`controlador`), y datos (`modelo`).
 * **Optimización de Memoria (I/O):** Uso de `BufferedReader` y `BufferedWriter` para operaciones de lectura y escritura a alta velocidad.
-* **Interfaz de Usuario (Swing):** Vista estilo tabla con renderizador personalizado y tipografía monoespaciada para alineación perfecta.
+* **Interfaz de Usuario (Swing):** Vista estilo tabla con renderizado personalizado y tipografía monospaced para alineación perfecta.
 
 ---
 
@@ -64,7 +64,7 @@ Toda tu información es persistente. La "base de datos" es un archivo de texto q
 ---
 
 ### 👤 Autor
-* **Desarrollado por:** Martin Rody Rosero Jativa
+* **Desarrollado por:** Martin Rody Rosero Játiva
 * **Materia:** Programación de Interfaces Gráficas
 * **Universidad:** Universidad Politécnica Salesiana
 * **Bloque:** Bloque I - Unidad 1 (Manejo de Archivos)
