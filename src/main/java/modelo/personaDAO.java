@@ -1,7 +1,6 @@
 package modelo;
 
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,7 +16,7 @@ public class personaDAO {
 	// Constructor público de la clase "personaDAO" que recibe un objeto "persona" como parámetro
 	public personaDAO(persona persona) {
 		this.persona = persona; // Asigna el objeto "persona" recibido al atributo de la clase
-		archivo = new File("src/main/resources"); // Establece la ruta donde se alojará el archivo
+		archivo = new File("src/main/resources/files"); // Establece la ruta donde se alojará el archivo
 		// Llama al método para preparar el archivo
 		prepararArchivo();
 	}

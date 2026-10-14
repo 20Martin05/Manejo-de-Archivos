@@ -58,7 +58,7 @@ src/main/
 
 #### ¿Dónde se guardan los datos?
 Toda tu información es persistente. La "base de datos" es un archivo de texto que se crea automáticamente la primera vez que ejecutas la aplicación.
-* **Ruta del archivo:** `src/main/resources/datosContactos.csv`
+* **Ruta del archivo:** `src/main/resources/files/datosContactos.csv`
 * **Formato interno:** Los datos se separan por punto y coma (`;`). Ejemplo: `1;Maria Gomez;0949380301;mariagomez@icloud.com;Familia;true`
 
 ---
