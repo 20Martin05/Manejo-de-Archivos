@@ -12,16 +12,14 @@ public class ventana extends VentanaUI {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					ventana frame = new ventana();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
+		EventQueue.invokeLater(() -> {
+            try {
+                ventana frame = new ventana();
+                frame.setVisible(true);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
 	}
 
 	/**
@@ -50,6 +48,6 @@ public class ventana extends VentanaUI {
 		}
 
 		// Instance el controlador para usar el delegado
-		logica_ventana lv = new logica_ventana(this);
-	}
+        new logica_ventana(this);
+    }
 }

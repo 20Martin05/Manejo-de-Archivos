@@ -25,6 +25,7 @@ public class VentanaUI extends JFrame {
     public JButton btn_add;
     public JButton btn_modificar;
     public JButton btn_eliminar;
+    public JButton btn_exportar;
     public JTable lst_contactos;
     public JScrollPane scrLista;
     public JProgressBar barra;
@@ -119,6 +120,11 @@ public class VentanaUI extends JFrame {
         barra.setIndeterminate(false);
         barra.setStringPainted(true);
         panelContactos.add(barra, new GridConstraints(5, 0, 1, 3, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        btn_exportar = new JButton();
+        Font btn_exportarFont = this.$$$getFont$$$("Tahoma", Font.PLAIN, 15, btn_exportar.getFont());
+        if (btn_exportarFont != null) btn_exportar.setFont(btn_exportarFont);
+        btn_exportar.setText("EXPORTAR");
+        panelContactos.add(btn_exportar, new GridConstraints(3, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(125, 40), null, 0, false));
         panelEstadisticas = new JPanel();
         panelEstadisticas.setLayout(new GridLayoutManager(1, 1, new Insets(20, 20, 20, 20), -1, -1));
         tabbedPane.addTab("Estadísticas", panelEstadisticas);

@@ -2,14 +2,13 @@ package controlador;
 
 import java.awt.Font;
 import java.awt.event.*;
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-import javax.swing.JOptionPane;
-import javax.swing.ListSelectionModel;
-import javax.swing.RowFilter;
+import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
@@ -49,6 +48,7 @@ public class logica_ventana implements ActionListener, ListSelectionListener, It
 	    this.delegado.btn_add.addActionListener(this);
 	    this.delegado.btn_eliminar.addActionListener(this);
 	    this.delegado.btn_modificar.addActionListener(this);
+	    this.delegado.btn_exportar.addActionListener(this);
 
 	    // Registra los ItemListener para el JComboBox de categoría y el JCheckBox de favoritos.
 	    this.delegado.cmb_categoria.addItemListener(this);
@@ -276,7 +276,24 @@ public class logica_ventana implements ActionListener, ListSelectionListener, It
 			} else {
 				JOptionPane.showMessageDialog(delegado, "Por favor seleccione un contacto de la tabla para modificar.");
 			}
-	    }
+		} else if (e.getSource() == delegado.btn_exportar) {
+			JFileChooser chooser = new JFileChooser();
+			chooser.setDialogTitle("Exportar Contactos a CSV");
+			chooser.setSelectedFile(new File("contactos_exportados.csv"));
+
+			if (chooser.showSaveDialog(delegado) == JFileChooser.APPROVE_OPTION) {
+				File destino = chooser.getSelectedFile();
+				if (!destino.getName().toLowerCase().endsWith(".csv")) {
+					destino = new File(destino.getAbsolutePath() + ".csv");
+				}
+				try {
+					new personaDAO(new persona()).exportarCSV(destino, contactos);
+					JOptionPane.showMessageDialog(delegado, "Exportado exitosamente en:\n" + destino.getAbsolutePath());
+				} catch (IOException ex) {
+					JOptionPane.showMessageDialog(delegado, "Error al exportar archivo: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		}
 	}
 
 	// Método que maneja los eventos de selección en la tabla de contactos.

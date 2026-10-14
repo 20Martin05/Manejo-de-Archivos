@@ -1,5 +1,6 @@
 package modelo;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -11,7 +12,7 @@ public class personaDAO {
 	
 	// Declaración de atributos privados de la clase "personaDAO"
 	private File archivo; // Archivo donde se almacenarán los datos de los contactos
-	private persona persona; // Objeto "persona" que se gestionará
+	private final persona persona; // Objeto "persona" que se gestionará
 	
 	// Constructor público de la clase "personaDAO" que recibe un objeto "persona" como parámetro
 	public personaDAO(persona persona) {
@@ -115,5 +116,15 @@ public class personaDAO {
 		
 		// Cierra el archivo una sola vez al terminar
 		escritor.close();
+	}
+
+	//Exportar Archivo
+	public void exportarCSV(File destino, List<persona> lista) throws IOException {
+		try (BufferedWriter bw = new BufferedWriter(new FileWriter(destino, java.nio.charset.StandardCharsets.UTF_8))) {
+			bw.write("ID;NOMBRE;TELEFONO;EMAIL;CATEGORIA;FAVORITO\n");
+			for (persona p : lista) {
+				bw.write(p.datosContacto() + "\n");
+			}
+		}
 	}
 }

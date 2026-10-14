@@ -11,7 +11,7 @@ public class persona {
 	// Constructor público de la clase "persona"
 	public persona() {
 		super(); // Llama al constructor de la clase base (Object)
-		//Inicializa las varaibles 
+		//Inicializa las variables
 		this.id = 0;
 		this.nombre = "";
 		this.telefono = "";
@@ -19,10 +19,10 @@ public class persona {
 		this.categoria = "";
 		this.favorito = false;
 	}
-	// Constructor público de la clase "persona" que incializa todos los campos 
+	// Constructor público de la clase "persona" que inicializa todos los campos
 	public persona(int id, String nombre, String telefono, String email, String categoria, boolean favorito) {
 		super();// Llama al constructor de la clase base (Object)
-		//Incializa las variables con los valores enviado por los argumentos
+		//Inicializa las variables con los valores enviados por los argumentos
 		this.id = id;
 		this.nombre = nombre;
 		this.telefono = telefono;
@@ -93,14 +93,8 @@ public class persona {
 	
 	// Método para proveer un formato para almacenar en un archivo
 	public String datosContacto() {
-		// Estructurar el siguiente formato: id;nombre;telefono;email;categoria;favorito
-		String contacto = String.format("%d;%s;%s;%s;%s;%s", id, nombre, telefono, email, categoria, favorito);
-		return contacto; // Retorna la cadena formateada
-	}
-	//Método para proveer el formato de los campos que se van a imprimir en la lista
-	public String formatoLista() {
-		String contacto = String.format("%-10d%-40s%-40s%-40s%-40s", id, nombre, telefono, email, categoria);
-		return contacto;
+		// Estructurar el siguiente formato: id; nombre; telefono; email; categoria; favorito
+        return String.format("%d;%s;%s;%s;%s;%s", id, nombre, telefono, email, categoria, favorito); // Retorna la cadena formateada
 	}
 
 }
