@@ -1,20 +1,11 @@
 package controlador;
 
-import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
+import java.awt.event.*;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.DefaultListModel;
-import javax.swing.JComboBox;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
-import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -69,6 +60,19 @@ public class logica_ventana implements ActionListener, ListSelectionListener, It
 		        for (persona contacto : contactos) {
 		            modelo.addElement(contacto.formatoLista());
 		        }
+
+				barraProgreso();
+				new Thread(() -> {
+					try {
+						for (int i = 0; i < contactos.size(); i++) {
+							int progreso = i + 1;
+							Thread.sleep(150); // Breve pausa de 150ms por contacto para animación fluida (~1 segundo)
+							javax.swing.SwingUtilities.invokeLater(() -> delegado.barra.setValue(progreso));
+						}
+					} catch (InterruptedException e) {
+						Thread.currentThread().interrupt();
+					}
+				}).start();
 		        // Establece el modelo actualizado en la lista de contactos de la GUI.
 		        delegado.lst_contactos.setModel(modelo);
 		    } catch (IOException e) {
@@ -221,5 +225,14 @@ public class logica_ventana implements ActionListener, ListSelectionListener, It
 	        favorito = delegado.chb_favorito.isSelected();
 	        // Obtiene el estado seleccionado del JCheckBox y actualiza el estado de favorito en la variable "favorito".
 	    }
+	}
+
+	public void barraProgreso() {
+		int totalContacto = contactos.size();
+		delegado.barra.setMinimum(0);
+		delegado.barra.setMaximum(totalContacto);
+		delegado.barra.setValue(0);
+
+
 	}
 }
