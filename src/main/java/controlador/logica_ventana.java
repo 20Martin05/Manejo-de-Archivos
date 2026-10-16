@@ -2,10 +2,10 @@ package controlador;
 
 import java.awt.Font;
 import java.awt.event.*;
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-import java.util.Objects;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import javax.swing.*;
@@ -49,6 +49,9 @@ public class logica_ventana implements ActionListener, ListSelectionListener, It
 	    this.delegado.btn_eliminar.addActionListener(this);
 	    this.delegado.btn_modificar.addActionListener(this);
 	    this.delegado.btn_exportar.addActionListener(this);
+		this.delegado.btn_actualizar_estadisticas.addActionListener(this);
+		this.delegado.btn_limpiar_estadisticas.addActionListener(this);
+		this.delegado.btn_exportar_reporte.addActionListener(this);
 
 	    // Registra los ItemListener para el JComboBox de categoría y el JCheckBox de favoritos.
 	    this.delegado.cmb_categoria.addItemListener(this);
@@ -293,6 +296,14 @@ public class logica_ventana implements ActionListener, ListSelectionListener, It
 					JOptionPane.showMessageDialog(delegado, "Error al exportar archivo: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 				}
 			}
+        } else if (e.getSource() == delegado.btn_actualizar_estadisticas) {
+            calcularYMostrarEstadisticas(contactos);
+
+        } else if (e.getSource() == delegado.btn_limpiar_estadisticas) {
+            limpiarTablaEstadisticas();
+
+        } else if (e.getSource() == delegado.btn_exportar_reporte) {
+            exportarReporteEstadisticas(contactos, delegado);
 		}
 	}
 
@@ -345,4 +356,115 @@ public class logica_ventana implements ActionListener, ListSelectionListener, It
 		delegado.barra.setMaximum(totalContacto);
 		delegado.barra.setValue(0);
 	}
+
+	public String calcularYMostrarEstadisticas(List<persona> contactos) {
+		if (contactos == null || contactos.isEmpty()) {
+			limpiarTablaEstadisticas();
+			return "No hay contactos disponibles para generar el reporte.";
+		}
+
+		int total = contactos.size();
+		int fav = 0, noFav = 0;
+		Map<String, Integer> mapaCategorias = new LinkedHashMap<>();
+
+		for (persona p : contactos) {
+			if (p == null) continue;
+
+			if (p.isFavorito()) {
+				fav++;
+			} else {
+				noFav++;
+			}
+
+			String cat = (p.getCategoria() != null && !p.getCategoria().trim().isEmpty())
+					? p.getCategoria().trim()
+					: "Sin Categoría";
+
+			if (cat.equalsIgnoreCase("Amigo")) {
+				cat = "Amigos";
+			}
+
+			mapaCategorias.put(cat, mapaCategorias.getOrDefault(cat, 0) + 1);
+		}
+
+		double porcFav = (fav * 100.0) / total;
+		double porcNoFav = (noFav * 100.0) / total;
+
+		// Anchos para separadores de sección
+		String lineaDoble = "=========================================================================";
+		String lineaSimple = "-------------------------------------------------------------------------";
+
+		StringBuilder sb = new StringBuilder();
+
+		// 1. Encabezado principal
+		sb.append(lineaDoble).append("\n");
+		sb.append(String.format("%-73s\n", "                    REPORTE ESTADÍSTICO DE CONTACTOS"));
+		sb.append(lineaDoble).append("\n\n");
+
+		// 2. Total general
+		sb.append(String.format("- TOTAL DE CONTACTOS REGISTRADOS: %d\n\n\n", total));
+
+		// 3. Desglose por favoritos
+		sb.append(lineaSimple).append("\n");
+		sb.append("  DESGLOSE POR ESTADO DE FAVORITOS:\n");
+		sb.append(lineaSimple).append("\n");
+		sb.append(String.format("- Favoritos:     %-5d (%.1f%%)\n\n", fav, porcFav));
+		sb.append(String.format("- No Favoritos:  %-5d (%.1f%%)\n\n\n", noFav, porcNoFav));
+
+		// 4. Distribución por categorías
+		sb.append(lineaSimple).append("\n");
+		sb.append("  DISTRIBUCIÓN POR CATEGORÍAS:\n");
+		sb.append(lineaSimple).append("\n");
+
+		for (Map.Entry<String, Integer> entry : mapaCategorias.entrySet()) {
+			double porcCat = (entry.getValue() * 100.0) / total;
+			sb.append(String.format("- %-18s: %-5d (%.1f%%)\n\n", entry.getKey(), entry.getValue(), porcCat));
+		}
+
+		sb.append("\n");
+
+		// 5. Pie del reporte con fecha/hora
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+		String fechaActual = sdf.format(new Date());
+
+		sb.append(lineaDoble).append("\n");
+		sb.append(String.format("  Fecha de cálculo: %s\n", fechaActual));
+		sb.append(lineaDoble).append("\n");
+
+		String reporteTexto = sb.toString();
+
+		// Asignamos directamente la cadena al JTextArea de Swing
+		if (delegado.tbl_estadisticas != null) {
+			// Se recomienda fuente monospaciada para que las columnas mantengan la alineación
+			delegado.tbl_estadisticas.setFont(new Font("Monospaced", Font.PLAIN, 12));
+			delegado.tbl_estadisticas.setText(reporteTexto);
+			delegado.tbl_estadisticas.setCaretPosition(0); // Scroll al inicio
+		}
+
+		return reporteTexto;
+	}
+
+	public void limpiarTablaEstadisticas() {
+		if (delegado.tbl_estadisticas != null) {
+			delegado.tbl_estadisticas.setText("");
+		}
+	}
+
+    public void exportarReporteEstadisticas(List<persona> contactos, JFrame padre) {
+        String contenidoReporte = calcularYMostrarEstadisticas(contactos);
+
+        JFileChooser chooser = new JFileChooser();
+        chooser.setSelectedFile(new File("reporte_estadistico.txt"));
+
+        if (chooser.showSaveDialog(padre) == JFileChooser.APPROVE_OPTION) {
+            File destino = chooser.getSelectedFile();
+
+            try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(destino), StandardCharsets.UTF_8))) {
+                bw.write(contenidoReporte);
+                JOptionPane.showMessageDialog(padre, "Reporte exportado con éxito.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(padre, "Error al escribir el archivo: " + ex.getMessage(), "Error I/O", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
 }
