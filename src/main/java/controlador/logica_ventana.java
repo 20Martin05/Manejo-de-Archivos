@@ -40,6 +40,7 @@ public class logica_ventana implements ActionListener, ListSelectionListener, It
 	        this.delegado.lst_contactos.getTableHeader().setFont(new Font("Tahoma", Font.BOLD, 14));
 	    }
 	    this.delegado.lst_contactos.getSelectionModel().addListSelectionListener(this);
+	    configurarMenuContextual();
 
 	    // Carga los contactos almacenados al inicializar.
 	    cargarContactosRegistrados(); 
@@ -74,6 +75,42 @@ public class logica_ventana implements ActionListener, ListSelectionListener, It
 	            filtrar();
 	        }
 	    });
+	}
+
+	private void configurarMenuContextual() {
+		delegado.menuContactos = new JPopupMenu();
+		delegado.modificar= new JMenuItem("Modificar");
+		delegado.eliminar = new JMenuItem("Eliminar");
+
+		delegado.menuContactos.add(delegado.modificar);
+		delegado.menuContactos.add(delegado.eliminar);
+
+		delegado.modificar.addActionListener(e -> delegado.btn_modificar.doClick());
+		delegado.eliminar.addActionListener(e -> delegado.btn_eliminar.doClick());
+
+		delegado.lst_contactos.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				mostrarMenuContextual(e);
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				mostrarMenuContextual(e);
+			}
+		});
+	}
+
+	private void mostrarMenuContextual(MouseEvent e) {
+		if (!e.isPopupTrigger()) {
+			return;
+		}
+
+		int fila = delegado.lst_contactos.rowAtPoint(e.getPoint());
+		if (fila >= 0) {
+			delegado.lst_contactos.setRowSelectionInterval(fila, fila);
+			delegado.menuContactos.show(e.getComponent(), e.getX(), e.getY());
+		}
 	}
 
 	// Método privado para inicializar las variables con los valores ingresados en la GUI.

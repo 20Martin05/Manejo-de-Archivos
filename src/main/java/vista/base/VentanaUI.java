@@ -14,6 +14,9 @@ public class VentanaUI extends JFrame {
     public JTabbedPane tabbedPane;
     public JPanel panelContactos;
     public JPanel panelEstadisticas;
+    public JPopupMenu menuContactos;
+    public JMenuItem modificar;
+    public  JMenuItem eliminar;
 
     // Componentes de la pestaña Contactos
     public JTextField txt_nombres;
