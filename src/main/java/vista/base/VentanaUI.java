@@ -30,6 +30,13 @@ public class VentanaUI extends JFrame {
     public JScrollPane scrLista;
     public JProgressBar barra;
 
+    //Componentes de la pestaña Estadisiticas
+    public JTextArea tbl_estadisticas;
+    public JScrollPane scrEstadisticas;
+    public JButton btn_actualizar_estadisticas;
+    public JButton btn_limpiar_estadisticas;
+    public JButton btn_exportar_reporte;
+
     public VentanaUI() {
         $$$setupUI$$$();
     }
@@ -126,8 +133,28 @@ public class VentanaUI extends JFrame {
         btn_exportar.setText("EXPORTAR");
         panelContactos.add(btn_exportar, new GridConstraints(3, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(125, 40), null, 0, false));
         panelEstadisticas = new JPanel();
-        panelEstadisticas.setLayout(new GridLayoutManager(1, 1, new Insets(20, 20, 20, 20), -1, -1));
+        panelEstadisticas.setLayout(new GridLayoutManager(2, 3, new Insets(20, 20, 20, 20), -1, -1));
         tabbedPane.addTab("Estadísticas", panelEstadisticas);
+        scrEstadisticas = new JScrollPane();
+        panelEstadisticas.add(scrEstadisticas, new GridConstraints(0, 0, 1, 3, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(-1, 350), null, 0, false));
+        tbl_estadisticas = new JTextArea();
+        scrEstadisticas.setViewportView(tbl_estadisticas);
+        btn_actualizar_estadisticas = new JButton();
+        Font btn_actualizar_estadisticasFont = this.$$$getFont$$$("Tahoma", Font.PLAIN, 14, btn_actualizar_estadisticas.getFont());
+        if (btn_actualizar_estadisticasFont != null)
+            btn_actualizar_estadisticas.setFont(btn_actualizar_estadisticasFont);
+        btn_actualizar_estadisticas.setText("ACTUALIZAR ESTADISTICAS");
+        panelEstadisticas.add(btn_actualizar_estadisticas, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, 40), null, 0, false));
+        btn_limpiar_estadisticas = new JButton();
+        Font btn_limpiar_estadisticasFont = this.$$$getFont$$$("Tahoma", Font.PLAIN, 14, btn_limpiar_estadisticas.getFont());
+        if (btn_limpiar_estadisticasFont != null) btn_limpiar_estadisticas.setFont(btn_limpiar_estadisticasFont);
+        btn_limpiar_estadisticas.setText("LIMPIAR");
+        panelEstadisticas.add(btn_limpiar_estadisticas, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(125, 40), null, 0, false));
+        btn_exportar_reporte = new JButton();
+        Font btn_exportar_reporteFont = this.$$$getFont$$$("Tahoma", Font.PLAIN, 14, btn_exportar_reporte.getFont());
+        if (btn_exportar_reporteFont != null) btn_exportar_reporte.setFont(btn_exportar_reporteFont);
+        btn_exportar_reporte.setText("EXPORTAR REPORTE");
+        panelEstadisticas.add(btn_exportar_reporte, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, 40), null, 0, false));
     }
 
     /**
