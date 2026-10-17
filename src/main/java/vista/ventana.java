@@ -2,11 +2,14 @@ package vista;
 
 import java.awt.EventQueue;
 import javax.swing.JFrame;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import controlador.LogicaVentana;
 import vista.base.VentanaUI;
 
 public class ventana extends VentanaUI {
+	private static final Logger LOGGER = Logger.getLogger(ventana.class.getName());
 
 	/**
 	 * Launch the application.
@@ -17,7 +20,7 @@ public class ventana extends VentanaUI {
                 ventana frame = new ventana();
                 frame.setVisible(true);
             } catch (Exception e) {
-                e.printStackTrace();
+                LOGGER.log(Level.SEVERE, "No se pudo iniciar la aplicación", e);
             }
         });
 	}

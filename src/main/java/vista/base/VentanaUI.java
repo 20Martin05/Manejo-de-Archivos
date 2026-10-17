@@ -24,7 +24,7 @@ public class VentanaUI extends JFrame {
     public JTextField txt_email;
     public JTextField txt_buscar;
     public JCheckBox chb_favorito;
-    public JComboBox cmb_categoria;
+    public JComboBox<String> cmb_categoria;
     public JButton btn_add;
     public JButton btn_modificar;
     public JButton btn_eliminar;
@@ -110,7 +110,7 @@ public class VentanaUI extends JFrame {
         if (chb_favoritoFont != null) chb_favorito.setFont(chb_favoritoFont);
         chb_favorito.setText("CONTACTO FAVORITO");
         panelContactos.add(chb_favorito, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        cmb_categoria = new JComboBox();
+        cmb_categoria = new JComboBox<>();
         panelContactos.add(cmb_categoria, new GridConstraints(3, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, 31), null, 0, false));
         scrLista = new JScrollPane();
         panelContactos.add(scrLista, new GridConstraints(4, 0, 1, 3, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(-1, 400), null, 0, false));

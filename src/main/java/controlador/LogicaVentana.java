@@ -93,7 +93,7 @@ public class LogicaVentana implements ActionListener, ListSelectionListener, Ite
 		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_G, InputEvent.CTRL_DOWN_MASK), "agregarContacto");
 		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_DOWN_MASK), "exportarContacto");
 		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_DOWN_MASK), "buscarContacto");
-		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "cancelarOperacion");
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "clearSelectionAction");
 
 		actionMap.put("eliminarContacto", new AbstractAction() {
 			@Override
@@ -127,7 +127,7 @@ public class LogicaVentana implements ActionListener, ListSelectionListener, Ite
 				delegado.txt_buscar.selectAll();
 			}
 		});
-		actionMap.put("cancelarOperacion", new AbstractAction() {
+		actionMap.put("clearSelectionAction", new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				delegado.lst_contactos.clearSelection();
@@ -232,40 +232,7 @@ public class LogicaVentana implements ActionListener, ListSelectionListener, Ite
 			// Lee los contactos almacenados utilizando una instancia de personaDAO.
 			contactos = new PersonaDAO(new Persona()).leerArchivo();
 
-			// Columnas de la tabla
-			DefaultTableModel modelo = columnasDeLaTabla();
-
-			// Agrega cada contacto como una fila en la tabla
-			for (Persona contacto : contactos) {
-				modelo.addRow(new Object[]{
-					contacto.getId(),
-					contacto.getNombre(),
-					contacto.getTelefono(),
-					contacto.getEmail(),
-					contacto.getCategoria(),
-					contacto.isFavorito() ? "Sí" : "No"
-				});
-			}
-
-			// Asigna el modelo y configura el TableRowSorter
-			delegado.lst_contactos.setModel(modelo);
-			sorter = new TableRowSorter<>(modelo);
-			delegado.lst_contactos.setRowSorter(sorter);
-
-			// Configura anchos preferidos de las columnas
-			if (delegado.lst_contactos.getColumnModel().getColumnCount() >= 6) {
-				delegado.lst_contactos.getColumnModel().getColumn(0).setPreferredWidth(50);
-				delegado.lst_contactos.getColumnModel().getColumn(0).setMaxWidth(70);
-				delegado.lst_contactos.getColumnModel().getColumn(1).setPreferredWidth(160);
-				delegado.lst_contactos.getColumnModel().getColumn(2).setPreferredWidth(100);
-				delegado.lst_contactos.getColumnModel().getColumn(3).setPreferredWidth(180);
-				delegado.lst_contactos.getColumnModel().getColumn(4).setPreferredWidth(110);
-				delegado.lst_contactos.getColumnModel().getColumn(5).setPreferredWidth(80);
-				delegado.lst_contactos.getColumnModel().getColumn(5).setMaxWidth(90);
-			}
-
-			// Replica filtro de búsqueda si hay texto ingresado
-			filtrar();
+			actualizarTabla(contactos);
 
 			barraProgreso();
 			delegado.barra.setValue(contactos.size());
@@ -297,8 +264,13 @@ public class LogicaVentana implements ActionListener, ListSelectionListener, Ite
 	}
 
 	private void refrescarTablaDesdeMemoria() {
+		actualizarTabla(contactos);
+		actualizarEstadoAcciones();
+	}
+
+	private void actualizarTabla(List<Persona> personas) {
 		DefaultTableModel modelo = columnasDeLaTabla();
-		for (Persona contacto : contactos) {
+		for (Persona contacto : personas) {
 			modelo.addRow(new Object[]{
 					contacto.getId(),
 					contacto.getNombre(),
@@ -312,7 +284,17 @@ public class LogicaVentana implements ActionListener, ListSelectionListener, Ite
 		sorter = new TableRowSorter<>(modelo);
 		delegado.lst_contactos.setRowSorter(sorter);
 		filtrar();
-		actualizarEstadoAcciones();
+
+		if (delegado.lst_contactos.getColumnModel().getColumnCount() >= 6) {
+			delegado.lst_contactos.getColumnModel().getColumn(0).setPreferredWidth(50);
+			delegado.lst_contactos.getColumnModel().getColumn(0).setMaxWidth(70);
+			delegado.lst_contactos.getColumnModel().getColumn(1).setPreferredWidth(160);
+			delegado.lst_contactos.getColumnModel().getColumn(2).setPreferredWidth(100);
+			delegado.lst_contactos.getColumnModel().getColumn(3).setPreferredWidth(180);
+			delegado.lst_contactos.getColumnModel().getColumn(4).setPreferredWidth(110);
+			delegado.lst_contactos.getColumnModel().getColumn(5).setPreferredWidth(80);
+			delegado.lst_contactos.getColumnModel().getColumn(5).setMaxWidth(90);
+		}
 	}
 
 	// Método privado para limpiar los campos de entrada en la GUI y reiniciar variables.
@@ -521,8 +503,8 @@ public class LogicaVentana implements ActionListener, ListSelectionListener, Ite
 			mapaCategorias.put(cat, mapaCategorias.getOrDefault(cat, 0) + 1);
 		}
 
-		double porcFav = (fav * 100.0) / total;
-		double porcNoFav = (noFav * 100.0) / total;
+		double porcentajeFavoritos = (fav * 100.0) / total;
+		double porcentajeNoFavoritos = (noFav * 100.0) / total;
 
 		// Anchos para separadores de sección
 		String lineaDoble = "=========================================================================";
@@ -542,8 +524,8 @@ public class LogicaVentana implements ActionListener, ListSelectionListener, Ite
 		sb.append(lineaSimple).append("\n");
 		sb.append("  DESGLOSE POR ESTADO DE FAVORITOS:\n");
 		sb.append(lineaSimple).append("\n");
-		sb.append(String.format("- Favoritos:     %-5d (%.1f%%)\n\n", fav, porcFav));
-		sb.append(String.format("- No Favoritos:  %-5d (%.1f%%)\n\n\n", noFav, porcNoFav));
+		sb.append(String.format("- Favoritos:     %-5d (%.1f%%)\n\n", fav, porcentajeFavoritos));
+		sb.append(String.format("- No Favoritos:  %-5d (%.1f%%)\n\n\n", noFav, porcentajeNoFavoritos));
 
 		// 4. Distribución por categorías
 		sb.append(lineaSimple).append("\n");
@@ -551,8 +533,8 @@ public class LogicaVentana implements ActionListener, ListSelectionListener, Ite
 		sb.append(lineaSimple).append("\n");
 
 		for (Map.Entry<String, Integer> entry : mapaCategorias.entrySet()) {
-			double porcCat = (entry.getValue() * 100.0) / total;
-			sb.append(String.format("- %-18s: %-5d (%.1f%%)\n\n", entry.getKey(), entry.getValue(), porcCat));
+			double porcentajeCategoria = (entry.getValue() * 100.0) / total;
+			sb.append(String.format("- %-18s: %-5d (%.1f%%)\n\n", entry.getKey(), entry.getValue(), porcentajeCategoria));
 		}
 
 		sb.append("\n");
@@ -569,7 +551,7 @@ public class LogicaVentana implements ActionListener, ListSelectionListener, Ite
 
 		// Asignamos directamente la cadena al JTextArea de Swing
 		if (delegado.tbl_estadisticas != null) {
-			// Se recomienda fuente monospaciada para que las columnas mantengan la alineación
+			// Se recomienda una fuente de ancho fijo para mantener la alineación
 			delegado.tbl_estadisticas.setFont(new Font("Monospaced", Font.PLAIN, 12));
 			delegado.tbl_estadisticas.setText(reporteTexto);
 			delegado.tbl_estadisticas.setCaretPosition(0); // Scroll al inicio

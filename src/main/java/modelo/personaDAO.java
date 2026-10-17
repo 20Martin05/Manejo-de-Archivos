@@ -7,9 +7,12 @@ import java.nio.file.Files;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 //Definición de la clase pública "personaDAO"
 public class PersonaDAO {
+	private static final Logger LOGGER = Logger.getLogger(PersonaDAO.class.getName());
 	private static final String DATA_DIRECTORY = "src/main/resources/files";
 	private static final String CONTACTS_FILE = "tabla_contactos.csv";
 	
@@ -29,7 +32,10 @@ public class PersonaDAO {
 	private void prepararArchivo() {
 		// Verifica si el directorio existe
 		if (!archivo.exists()) { // Si el directorio no existe, se crea
-			archivo.mkdirs();
+			if (!archivo.mkdirs() && !archivo.isDirectory()) {
+				LOGGER.severe("No se pudo crear el directorio de datos: " + archivo.getAbsolutePath());
+				return;
+			}
 		}
 		
 		// Accede al archivo de contactos dentro del directorio especificado
@@ -37,22 +43,22 @@ public class PersonaDAO {
 		// Verifica si el archivo existe
 		if (!archivo.exists()) { // Si el archivo no existe, se crea
 			try {
-				archivo.createNewFile();
+				if (!archivo.createNewFile() && !archivo.exists()) {
+					LOGGER.severe("No se pudo crear el archivo de contactos: " + archivo.getAbsolutePath());
+				}
 			} catch (IOException e) {
-				// Maneja la excepción de entrada/salida
-				e.printStackTrace();
+				LOGGER.log(Level.SEVERE, "No se pudo crear el archivo de contactos", e);
 			}
 		}
 	}
 	// Método público para escribir en el archivo (Optimizado)
-	public boolean escribirArchivo() throws IOException {
+	public void escribirArchivo() throws IOException {
 		// Abre el archivo usando BufferedWriter para mayor eficiencia
 		try (BufferedWriter escribir = Files.newBufferedWriter(archivo.toPath(), StandardCharsets.UTF_8,
 				java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND)) {
 			escribir.write(persona.datosContacto());
 			escribir.newLine();
 		}
-		return true; // Retorna true si la escritura fue exitosa
 	}
 	
 	// Método público para leer los datos del archivo
@@ -110,7 +116,7 @@ public class PersonaDAO {
 	//Exportar Archivo
 	public void exportarCSV(File destino, List<Persona> lista) throws IOException {
 		try (BufferedWriter bw = Files.newBufferedWriter(destino.toPath(), java.nio.charset.StandardCharsets.UTF_8)) {
-			bw.write("ID;NOMBRE;TELEFONO;EMAIL;CATEGORIA;FAVORITO\n");
+			bw.write("ID;NOMBRE;TELÉFONO;EMAIL;CATEGORIA;FAVORITO\n");
 			for (Persona p : lista) {
 				bw.write(p.datosContacto() + "\n");
 			}
