@@ -9,17 +9,19 @@ El desarrollo aplica el patrón de arquitectura **MVC (Modelo-Vista-Controlador)
 ### ⚙️ Características Técnicas
 
 * **CRUD Completo:** Creación, lectura, actualización y eliminación de registros (Create, Read, Update, Delete).
-* **Persistencia en Texto Plano:** La información se guarda y recupera desde un archivo local (`datosContactos.csv`).
+* **Persistencia en Texto Plano:** La información se guarda y recupera desde un archivo local (`tabla_contactos.csv`).
 * **Identificadores Únicos (ID):** Algoritmo de auto-incremento de Llaves Primarias para cada contacto.
 * **Patrón de Arquitectura MVC:** Separación estricta de la interfaz gráfica (`vista`), lógica y eventos (`controlador`), y datos (`modelo`).
 * **Optimización de Memoria (I/O):** Uso de `BufferedReader` y `BufferedWriter` para operaciones de lectura y escritura a alta velocidad.
 * **Interfaz de Usuario (Swing):** Vista estilo tabla con renderizado personalizado y tipografía monospaced para alineación perfecta.
+* **Menú Contextual:** Menú con clic derecho sobre la tabla para modificar o eliminar el contacto seleccionado.
+* **Atajos de Teclado:** Acceso rápido a las operaciones principales mediante combinaciones de teclas.
 
 ---
 
 ### 🛠️ Requisitos Previos
 Para compilar y ejecutar este proyecto correctamente, necesitas tener instalado:
-* **Java Development Kit (JDK)** versión 17 o superior.
+* **Java Development Kit (JDK)** versión 21 o superior.
 * **Apache Maven** (gestor de dependencias y construcción).
 * Un entorno de desarrollo (IDE) como **IntelliJ IDEA** (recomendado), Eclipse o NetBeans.
 
@@ -31,14 +33,19 @@ El código está organizado bajo el patrón Modelo-Vista-Controlador de la sigui
 src/main/
  ├── java/
  │   ├── controlador/
- │   │   └── logica_ventana.java  # Control de eventos, validaciones y nexo UI-Datos
+ │   │   └── LogicaVentana.java   # Control de eventos, validaciones y nexo UI-Datos
  │   ├── modelo/
- │   │   ├── persona.java         # Estructura del objeto Contacto
- │   │   └── personaDAO.java      # Lógica de lectura/escritura (Data Access Object)
+ │   │   ├── Persona.java         # Estructura del objeto Contacto
+ │   │   └── PersonaDAO.java      # Lógica de lectura/escritura (Data Access Object)
  │   └── vista/
- │       └── ventana.java         # Diseño de la interfaz gráfica (Java Swing) y Main
+ │       ├── ventana.java         # Clase principal y punto de entrada de la aplicación
+ │       └── base/
+ │           ├── VentanaUI.java    # Componentes y diseño base de la interfaz
+ │           └── VentanaUI.form   # Diseño visual de IntelliJ GUI Designer
  └── resources/
-     └── datosContactos.csv       # Archivo de persistencia de datos
+     └── files/
+         ├── tabla_contactos.csv        # Tabla/listado persistente de contactos
+         └── reporte_estadisticas.txt   # Reporte exportado desde la pestaña Estadísticas
 ```
 
 ---
@@ -52,13 +59,24 @@ src/main/
 #### ¿Cómo funciona la interfaz?
 * **Agregar un contacto:** Llena todos los campos de texto (Nombres, Teléfono, Email), elige una Categoría, marca si es favorito, y presiona **AGREGAR**. El contacto aparecerá inmediatamente en la lista inferior con su ID asignado.
 * **Modificar un contacto:** Haz clic sobre un contacto existente en la lista blanca inferior. Sus datos se cargarán automáticamente en los campos de texto superiores. Cambia lo que necesites y presiona **MODIFICAR**.
-* **Eliminar un contacto:** Selecciona el contacto en la lista inferior y presiona **ELIMINAR**. 
+* **Eliminar un contacto:** Selecciona el contacto en la lista inferior y presiona **ELIMINAR**.
+* **Menú contextual:** Haz clic derecho sobre una fila para acceder a las opciones **Modificar** y **Eliminar**.
+* **Atajos de teclado:**
+  * **Supr/Delete:** Elimina el contacto seleccionado.
+  * **Ctrl + S:** Modifica los datos del contacto seleccionado.
+  * **Ctrl + G:** Agrega un contacto nuevo.
+  * **Ctrl + E:** Exporta los contactos a un archivo CSV.
+  * **Ctrl + F:** Enfoca el campo de búsqueda y selecciona su contenido.
+  * **Escape:** Quita la selección de la tabla.
+  * **Estadísticas:** Genera un reporte con el total de contactos, favoritos y distribución por categorías.
+  * **Exportar reporte:** Guarda las estadísticas generadas en un archivo de texto.
 
 *(Nota: El sistema cuenta con alertas de seguridad que te impedirán guardar datos incompletos o intentar modificar/eliminar sin haber seleccionado a nadie previamente).*
 
 #### ¿Dónde se guardan los datos?
 Toda tu información es persistente. La "base de datos" es un archivo de texto que se crea automáticamente la primera vez que ejecutas la aplicación.
-* **Ruta del archivo:** `src/main/resources/files/datosContactos.csv`
+* **Tabla de contactos:** `src/main/resources/files/tabla_contactos.csv`
+* **Ruta del reporte estadístico:** `src/main/resources/files/reporte_estadisticas.txt`
 * **Formato interno:** Los datos se separan por punto y coma (`;`). Ejemplo: `1;Maria Gomez;0949380301;mariagomez@icloud.com;Familia;true`
 
 ---
