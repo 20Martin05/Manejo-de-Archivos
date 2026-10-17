@@ -1,12 +1,16 @@
 package controlador;
 
-import java.awt.Font;
+import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.List;
 import java.util.regex.Pattern;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -20,15 +24,15 @@ import vista.ventana;
 import modelo.*;
 
 //Definición de la clase lógica_ventana que implementa tres interfaces para manejar eventos.
-public class logica_ventana implements ActionListener, ListSelectionListener, ItemListener {
+public class LogicaVentana implements ActionListener, ListSelectionListener, ItemListener {
 	private final ventana delegado; // Referencia a la ventana principal que contiene la GUI.
 	private String nombres, email, telefono, categoria=""; // Variables para almacenar datos del contacto.
-    private List<persona> contactos; // Lista de objetos persona que representa todos los contactos.
+    private List<Persona> contactos; // Lista de objetos persona que representa todos los contactos.
 	private boolean favorito = false; // Booleano que indica si un contacto es favorito.
 	private TableRowSorter<DefaultTableModel> sorter; // Sorter y filtro para la JTable
 
 	// Constructor que inicializa la clase y configura los escuchadores de eventos para los componentes de la GUI.
-	public logica_ventana(ventana delegado) {
+	public LogicaVentana(ventana delegado) {
 	    // Asigna la ventana recibida como parámetro a la variable de instancia delegado.
 	    this.delegado = delegado;
 
@@ -40,7 +44,9 @@ public class logica_ventana implements ActionListener, ListSelectionListener, It
 	        this.delegado.lst_contactos.getTableHeader().setFont(new Font("Tahoma", Font.BOLD, 14));
 	    }
 	    this.delegado.lst_contactos.getSelectionModel().addListSelectionListener(this);
+	    actualizarEstadoAcciones();
 	    configurarMenuContextual();
+	    configurarAtajosTeclado();
 
 	    // Carga los contactos almacenados al inicializar.
 	    cargarContactosRegistrados(); 
@@ -77,6 +83,57 @@ public class logica_ventana implements ActionListener, ListSelectionListener, It
 	    });
 	}
 
+	private void configurarAtajosTeclado() {
+        JComponent component = delegado.getRootPane();
+        InputMap inputMap = component.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+		ActionMap actionMap = component.getActionMap();
+
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "eliminarContacto");
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK), "guardarContacto");
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_G, InputEvent.CTRL_DOWN_MASK), "agregarContacto");
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_DOWN_MASK), "exportarContacto");
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_DOWN_MASK), "buscarContacto");
+		inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "cancelarOperacion");
+
+		actionMap.put("eliminarContacto", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				delegado.btn_eliminar.doClick();
+			}
+		});
+		actionMap.put("guardarContacto", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				delegado.btn_modificar.doClick();
+			}
+		});
+
+		actionMap.put("agregarContacto", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				delegado.btn_add.doClick();
+			}
+		});
+		actionMap.put("exportarContacto", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				delegado.btn_exportar.doClick();
+			}
+		});
+		actionMap.put("buscarContacto", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				delegado.txt_buscar.requestFocusInWindow();
+				delegado.txt_buscar.selectAll();
+			}
+		});
+		actionMap.put("cancelarOperacion", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				delegado.lst_contactos.clearSelection();
+			}
+		});
+	}
 	private void configurarMenuContextual() {
 		delegado.menuContactos = new JPopupMenu();
 		delegado.modificar= new JMenuItem("Modificar");
@@ -109,6 +166,7 @@ public class logica_ventana implements ActionListener, ListSelectionListener, It
 		int fila = delegado.lst_contactos.rowAtPoint(e.getPoint());
 		if (fila >= 0) {
 			delegado.lst_contactos.setRowSelectionInterval(fila, fila);
+			actualizarEstadoAcciones();
 			delegado.menuContactos.show(e.getComponent(), e.getX(), e.getY());
 		}
 	}
@@ -121,6 +179,30 @@ public class logica_ventana implements ActionListener, ListSelectionListener, It
 		telefono = delegado.txt_telefono.getText();
 	}
 
+	private boolean datosValidos() {
+		if (nombres.isBlank() || telefono.isBlank() || email.isBlank()) {
+			JOptionPane.showMessageDialog(delegado, "Todos los campos deben ser llenados.");
+			return false;
+		}
+		if (!nombres.matches("[\\p{L} .'-]{2,80}")) {
+			JOptionPane.showMessageDialog(delegado, "El nombre contiene caracteres no válidos.");
+			return false;
+		}
+		if (!telefono.matches("\\d{7,15}")) {
+			JOptionPane.showMessageDialog(delegado, "El teléfono debe contener entre 7 y 15 dígitos.");
+			return false;
+		}
+		if (!email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
+			JOptionPane.showMessageDialog(delegado, "Ingrese un correo electrónico válido.");
+			return false;
+		}
+		if (categoria.equals("Elija una Categoria") || categoria.isBlank()) {
+			JOptionPane.showMessageDialog(delegado, "Elija una categoría.");
+			return false;
+		}
+		return true;
+	}
+
 	// Método privado para filtrar los contactos por nombre en tiempo real
 	private void filtrar() {
 	    if (sorter == null) return;
@@ -128,22 +210,33 @@ public class logica_ventana implements ActionListener, ListSelectionListener, It
 	    if (texto.isEmpty()) {
 	        sorter.setRowFilter(null);
 	    } else {
-	        // Filtra por la columna NOMBRES (índice 1), insensible a mayúsculas y minúsculas
-	        sorter.setRowFilter(RowFilter.regexFilter("(?i)" + Pattern.quote(texto), 1));
+	        sorter.setRowFilter(RowFilter.regexFilter("(?i)" + Pattern.quote(texto)));
 	    }
+	}
+
+	private void actualizarEstadoAcciones() {
+		boolean haySeleccion = delegado.lst_contactos.getSelectedRow() >= 0;
+		delegado.btn_modificar.setEnabled(haySeleccion);
+		delegado.btn_eliminar.setEnabled(haySeleccion);
+		if (delegado.modificar != null) {
+			delegado.modificar.setEnabled(haySeleccion);
+		}
+		if (delegado.eliminar != null) {
+			delegado.eliminar.setEnabled(haySeleccion);
+		}
 	}
 
 	// Método privado para cargar los contactos almacenados desde un archivo.
 	private void cargarContactosRegistrados() {
 		try {
 			// Lee los contactos almacenados utilizando una instancia de personaDAO.
-			contactos = new personaDAO(new persona()).leerArchivo();
+			contactos = new PersonaDAO(new Persona()).leerArchivo();
 
 			// Columnas de la tabla
 			DefaultTableModel modelo = columnasDeLaTabla();
 
 			// Agrega cada contacto como una fila en la tabla
-			for (persona contacto : contactos) {
+			for (Persona contacto : contactos) {
 				modelo.addRow(new Object[]{
 					contacto.getId(),
 					contacto.getNombre(),
@@ -175,19 +268,7 @@ public class logica_ventana implements ActionListener, ListSelectionListener, It
 			filtrar();
 
 			barraProgreso();
-			new Thread(() -> {
-				try {
-					int total = contactos.size();
-					int pausa = total > 0 ? Math.max(10, 1000 / total) : 20;
-					for (int i = 0; i < total; i++) {
-						int progreso = i + 1;
-						Thread.sleep(pausa); // Animación fluida de aproximadamente 1 segundo en total
-						javax.swing.SwingUtilities.invokeLater(() -> delegado.barra.setValue(progreso));
-					}
-				} catch (InterruptedException e) {
-					Thread.currentThread().interrupt();
-				}
-			}).start();
+			delegado.barra.setValue(contactos.size());
 
 		} catch (IOException e) {
 			// Muestra un mensaje de error si ocurre una excepción al cargar los contactos.
@@ -215,6 +296,25 @@ public class logica_ventana implements ActionListener, ListSelectionListener, It
         };
 	}
 
+	private void refrescarTablaDesdeMemoria() {
+		DefaultTableModel modelo = columnasDeLaTabla();
+		for (Persona contacto : contactos) {
+			modelo.addRow(new Object[]{
+					contacto.getId(),
+					contacto.getNombre(),
+					contacto.getTelefono(),
+					contacto.getEmail(),
+					contacto.getCategoria(),
+					contacto.isFavorito() ? "Sí" : "No"
+			});
+		}
+		delegado.lst_contactos.setModel(modelo);
+		sorter = new TableRowSorter<>(modelo);
+		delegado.lst_contactos.setRowSorter(sorter);
+		filtrar();
+		actualizarEstadoAcciones();
+	}
+
 	// Método privado para limpiar los campos de entrada en la GUI y reiniciar variables.
 	private void limpiarCampos() {
 		// Limpia los campos de nombres, email y teléfono en la GUI.
@@ -231,8 +331,6 @@ public class logica_ventana implements ActionListener, ListSelectionListener, It
 	    delegado.lst_contactos.clearSelection();
 	    // Reinicia las variables con los valores actuales de la GUI.
 	    inicializacionCampos();
-	    // Recarga los contactos en la lista de contactos de la GUI.
-	    cargarContactosRegistrados();
 	}
 
 	// Método que maneja los eventos de acción (clic) en los botones.
@@ -243,33 +341,33 @@ public class logica_ventana implements ActionListener, ListSelectionListener, It
 	    // Verifica si el evento proviene del botón "Agregar".
 	    if (e.getSource() == delegado.btn_add) {
 	        // Verifica si los campos de nombres, teléfono y email no están vacíos.
-	        if ((!nombres.isEmpty()) && (!telefono.isEmpty()) && (!email.isEmpty())) {
-	            // Verifica si se ha seleccionado una categoría válida.
-	            if ((!categoria.equals("Elija una Categoria")) && (!categoria.isEmpty())) {
+	        if (datosValidos()) {
 	                // Calcula el nuevo ID (como base de datos)
 	                int nuevoId = 1;
 	                if (contactos != null && !contactos.isEmpty()) {
-	                    nuevoId = contactos.getLast().getId() + 1;
+	                    nuevoId = contactos.stream()
+								.mapToInt(Persona::getId)
+								.max()
+								.orElse(0) + 1;
 	                }
 	                // Crea un nuevo objeto persona con los datos ingresados y el ID y lo guarda.
                     // Objeto de tipo persona, que representa un contacto.
-                    persona persona = new persona(nuevoId, nombres, telefono, email, categoria, favorito);
+                    Persona persona = new Persona(nuevoId, nombres, telefono, email, categoria, favorito);
                     try {
-                        new personaDAO(persona).escribirArchivo();
+                        new PersonaDAO(persona).escribirArchivo();
+                        contactos.add(persona);
+                        refrescarTablaDesdeMemoria();
+                        guardarReporteActualizado();
                     } catch (IOException ex) {
-                        throw new RuntimeException(ex);
+						JOptionPane.showMessageDialog(delegado,
+								"Error al guardar el contacto: " + ex.getMessage(),
+								"Error", JOptionPane.ERROR_MESSAGE);
+						return;
                     }
                     // Limpia los campos después de agregar el contacto.
 	                limpiarCampos();
 	                // Muestra un mensaje de éxito.
 	                JOptionPane.showMessageDialog(delegado, "Contacto Registrado!!!");
-	            } else {
-	                // Muestra un mensaje de advertencia si no se ha seleccionado una categoría válida.
-	                JOptionPane.showMessageDialog(delegado, "Elija una Categoria!!!");
-	            }
-	        } else {
-	            // Muestra un mensaje de advertencia si algún campo está vacío.
-	            JOptionPane.showMessageDialog(delegado, "Todos los campos deben ser llenados!!!");
 	        }
 	    } else if (e.getSource() == delegado.btn_eliminar) {
 			int filaVista = delegado.lst_contactos.getSelectedRow();
@@ -277,7 +375,9 @@ public class logica_ventana implements ActionListener, ListSelectionListener, It
 				int filaModelo = delegado.lst_contactos.convertRowIndexToModel(filaVista);
 				try {
 					contactos.remove(filaModelo);
-					new personaDAO(new persona()).actualizarContactos(contactos);
+					new PersonaDAO(new Persona()).actualizarContactos(contactos);
+					refrescarTablaDesdeMemoria();
+					guardarReporteActualizado();
 					limpiarCampos();
 					JOptionPane.showMessageDialog(delegado, "Eliminado con Éxito");
 
@@ -294,24 +394,20 @@ public class logica_ventana implements ActionListener, ListSelectionListener, It
 			int filaVista = delegado.lst_contactos.getSelectedRow();
 			if (filaVista != -1) {
 				int filaModelo = delegado.lst_contactos.convertRowIndexToModel(filaVista);
-				if ((!nombres.isEmpty()) && (!telefono.isEmpty()) && (!email.isEmpty())) {
-					if ((!categoria.equals("Elija una Categoria")) && (!categoria.isEmpty())) {
+				if (datosValidos()) {
 						try {
 							int idOriginal = contactos.get(filaModelo).getId();
-							persona contactoModificado = new persona(idOriginal, nombres, telefono, email, categoria, favorito);
+							Persona contactoModificado = new Persona(idOriginal, nombres, telefono, email, categoria, favorito);
 
 							contactos.set(filaModelo, contactoModificado);
-							new personaDAO(new persona()).actualizarContactos(contactos);
+							new PersonaDAO(new Persona()).actualizarContactos(contactos);
+							refrescarTablaDesdeMemoria();
+							guardarReporteActualizado();
 							limpiarCampos();
 							JOptionPane.showMessageDialog(delegado, "Modificado con Éxito");
 						} catch (Exception ex) {
 							JOptionPane.showMessageDialog(delegado, "Error al modificar el contacto", "Error", JOptionPane.ERROR_MESSAGE);
 						}
-					} else {
-						JOptionPane.showMessageDialog(delegado, "Elija una Categoria!!!");
-					}
-				} else {
-					JOptionPane.showMessageDialog(delegado, "Todos los campos deben ser llenados!!!");
 				}
 			} else {
 				JOptionPane.showMessageDialog(delegado, "Por favor seleccione un contacto de la tabla para modificar.");
@@ -319,7 +415,7 @@ public class logica_ventana implements ActionListener, ListSelectionListener, It
 		} else if (e.getSource() == delegado.btn_exportar) {
 			JFileChooser chooser = new JFileChooser();
 			chooser.setDialogTitle("Exportar Contactos a CSV");
-			chooser.setSelectedFile(new File("contactos_exportados.csv"));
+			chooser.setSelectedFile(new File("tabla_contactos.csv"));
 
 			if (chooser.showSaveDialog(delegado) == JFileChooser.APPROVE_OPTION) {
 				File destino = chooser.getSelectedFile();
@@ -327,7 +423,7 @@ public class logica_ventana implements ActionListener, ListSelectionListener, It
 					destino = new File(destino.getAbsolutePath() + ".csv");
 				}
 				try {
-					new personaDAO(new persona()).exportarCSV(destino, contactos);
+					new PersonaDAO(new Persona()).exportarCSV(destino, contactos);
 					JOptionPane.showMessageDialog(delegado, "Exportado exitosamente en:\n" + destino.getAbsolutePath());
 				} catch (IOException ex) {
 					JOptionPane.showMessageDialog(delegado, "Error al exportar archivo: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -348,6 +444,7 @@ public class logica_ventana implements ActionListener, ListSelectionListener, It
 	@Override
 	public void valueChanged(ListSelectionEvent e) {
 		if (!e.getValueIsAdjusting()) {
+			actualizarEstadoAcciones();
 			int filaVista = delegado.lst_contactos.getSelectedRow();
 			if (filaVista >= 0 && filaVista < delegado.lst_contactos.getRowCount()) {
 				int filaModelo = delegado.lst_contactos.convertRowIndexToModel(filaVista);
@@ -394,7 +491,7 @@ public class logica_ventana implements ActionListener, ListSelectionListener, It
 		delegado.barra.setValue(0);
 	}
 
-	public String calcularYMostrarEstadisticas(List<persona> contactos) {
+	public String calcularYMostrarEstadisticas(List<Persona> contactos) {
 		if (contactos == null || contactos.isEmpty()) {
 			limpiarTablaEstadisticas();
 			return "No hay contactos disponibles para generar el reporte.";
@@ -404,7 +501,7 @@ public class logica_ventana implements ActionListener, ListSelectionListener, It
 		int fav = 0, noFav = 0;
 		Map<String, Integer> mapaCategorias = new LinkedHashMap<>();
 
-		for (persona p : contactos) {
+		for (Persona p : contactos) {
 			if (p == null) continue;
 
 			if (p.isFavorito()) {
@@ -487,11 +584,35 @@ public class logica_ventana implements ActionListener, ListSelectionListener, It
 		}
 	}
 
-    public void exportarReporteEstadisticas(List<persona> contactos, JFrame padre) {
+	private void guardarReporteActualizado() {
+			String contenido = calcularYMostrarEstadisticas(contactos);
+			Path destino = Paths.get("src", "main", "resources", "files", "reporte_estadisticas.txt");
+
+			new SwingWorker<Void, Void>() {
+				@Override
+				protected Void doInBackground() throws IOException {
+					Files.writeString(destino, contenido, StandardCharsets.UTF_8);
+					return null;
+				}
+
+				@Override
+				protected void done() {
+					try {
+						get();
+					} catch (Exception ex) {
+						JOptionPane.showMessageDialog(delegado,
+								"No se pudo actualizar el reporte estadístico: " + ex.getMessage(),
+								"Error", JOptionPane.ERROR_MESSAGE);
+					}
+				}
+			}.execute();
+	}
+
+    public void exportarReporteEstadisticas(List<Persona> contactos, JFrame padre) {
         String contenidoReporte = calcularYMostrarEstadisticas(contactos);
 
         JFileChooser chooser = new JFileChooser();
-        chooser.setSelectedFile(new File("reporte_estadistico.txt"));
+        chooser.setSelectedFile(new File("reporte_estadisticas.txt"));
 
         if (chooser.showSaveDialog(padre) == JFileChooser.APPROVE_OPTION) {
             File destino = chooser.getSelectedFile();

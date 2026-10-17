@@ -33,7 +33,7 @@ public class VentanaUI extends JFrame {
     public JScrollPane scrLista;
     public JProgressBar barra;
 
-    //Componentes de la pestaña Estadisiticas
+    //Componentes de la pestaña Estadísticas
     public JTextArea tbl_estadisticas;
     public JScrollPane scrEstadisticas;
     public JButton btn_actualizar_estadisticas;
@@ -115,7 +115,6 @@ public class VentanaUI extends JFrame {
         scrLista = new JScrollPane();
         panelContactos.add(scrLista, new GridConstraints(4, 0, 1, 3, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(-1, 400), null, 0, false));
         lst_contactos = new JTable();
-        lst_contactos.setAutoCreateRowSorter(true);
         scrLista.setViewportView(lst_contactos);
         final JLabel label4 = new JLabel();
         Font label4Font = this.$$$getFont$$$("Tahoma", Font.BOLD, 15, label4.getFont());

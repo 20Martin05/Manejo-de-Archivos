@@ -2,22 +2,25 @@ package modelo;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
 //Definición de la clase pública "personaDAO"
-public class personaDAO {
+public class PersonaDAO {
+	private static final String DATA_DIRECTORY = "src/main/resources/files";
+	private static final String CONTACTS_FILE = "tabla_contactos.csv";
 	
 	// Declaración de atributos privados de la clase "personaDAO"
 	private File archivo; // Archivo donde se almacenarán los datos de los contactos
-	private final persona persona; // Objeto "persona" que se gestionará
+	private final Persona persona; // Objeto "persona" que se gestionará
 	
 	// Constructor público de la clase "personaDAO" que recibe un objeto "persona" como parámetro
-	public personaDAO(persona persona) {
+	public PersonaDAO(Persona persona) {
 		this.persona = persona; // Asigna el objeto "persona" recibido al atributo de la clase
-		archivo = new File("src/main/resources/files"); // Establece la ruta donde se alojará el archivo
+		archivo = new File(DATA_DIRECTORY); // Establece la ruta donde se alojará el archivo
 		// Llama al método para preparar el archivo
 		prepararArchivo();
 	}
@@ -29,8 +32,8 @@ public class personaDAO {
 			archivo.mkdirs();
 		}
 		
-		// Accede al archivo "datosContactos.csv" dentro del directorio especificado
-		archivo = new File(archivo.getAbsolutePath(), "datosContactos.csv");
+		// Accede al archivo de contactos dentro del directorio especificado
+		archivo = new File(archivo.getAbsolutePath(), CONTACTS_FILE);
 		// Verifica si el archivo existe
 		if (!archivo.exists()) { // Si el archivo no existe, se crea
 			try {
@@ -41,39 +44,24 @@ public class personaDAO {
 			}
 		}
 	}
-	private void escribir(String texto){
-		// Prepara el archivo para escribir en la última línea
-		FileWriter escribir;
-		try {
-			escribir = new FileWriter(archivo.getAbsolutePath(), true);
-			escribir.write(texto + "\n"); // Escribe los datos del contacto en el archivo
-			// Cierra el archivo
-			escribir.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		
-	}
-
 	// Método público para escribir en el archivo (Optimizado)
 	public boolean escribirArchivo() throws IOException {
 		// Abre el archivo usando BufferedWriter para mayor eficiencia
-		java.io.BufferedWriter escribir = new java.io.BufferedWriter(new java.io.FileWriter(archivo.getAbsolutePath(), true));
-		escribir.write(persona.datosContacto() + "\n"); // Escribe los datos del contacto en el archivo
-		// Cierra el archivo
-		escribir.close();
+		try (BufferedWriter escribir = Files.newBufferedWriter(archivo.toPath(), StandardCharsets.UTF_8,
+				java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND)) {
+			escribir.write(persona.datosContacto());
+			escribir.newLine();
+		}
 		return true; // Retorna true si la escritura fue exitosa
 	}
 	
 	// Método público para leer los datos del archivo
-	public List<persona> leerArchivo() throws IOException {
+	public List<Persona> leerArchivo() throws IOException {
 		// Crea una lista que almacenará cada persona encontrada
-		List<persona> personas = new ArrayList<>();
+		List<Persona> personas = new ArrayList<>();
 		
 		// Abre el archivo para leer (usamos BufferedReader para leer línea por línea muy rápido)
-		java.io.BufferedReader leer = new java.io.BufferedReader(new java.io.FileReader(archivo.getAbsolutePath()));
+		java.io.BufferedReader leer = Files.newBufferedReader(archivo.toPath(), StandardCharsets.UTF_8);
 		String linea;
 		
 		// Lee el archivo línea por línea hasta el final
@@ -85,7 +73,7 @@ public class personaDAO {
 			// Verifica de forma segura que la línea no esté dañada (debe tener al menos 6 datos)
 			if (partes.length >= 6) {
 				try {
-					persona p = new persona();
+					Persona p = new Persona();
 					p.setId(Integer.parseInt(partes[0]));
 					p.setNombre(partes[1]);
 					p.setTelefono(partes[2]);
@@ -105,12 +93,13 @@ public class personaDAO {
 	}
 	
 	// Método público para guardar los contactos modificados o eliminados (Optimizado)
-	public void actualizarContactos(List<persona> personas) throws IOException {
+	public void actualizarContactos(List<Persona> personas) throws IOException {
 		// Abre el archivo una sola vez en modo sobrescritura usando BufferedWriter
-		java.io.BufferedWriter escritor = new java.io.BufferedWriter(new java.io.FileWriter(archivo.getAbsolutePath(), false));
+		java.io.BufferedWriter escritor = Files.newBufferedWriter(archivo.toPath(), StandardCharsets.UTF_8,
+				java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.TRUNCATE_EXISTING);
 		
 		// Recorre los elementos de la lista y los escribe de golpe
-		for (persona p : personas) {
+		for (Persona p : personas) {
 			escritor.write(p.datosContacto() + "\n");
 		}
 		
@@ -119,10 +108,10 @@ public class personaDAO {
 	}
 
 	//Exportar Archivo
-	public void exportarCSV(File destino, List<persona> lista) throws IOException {
-		try (BufferedWriter bw = new BufferedWriter(new FileWriter(destino, java.nio.charset.StandardCharsets.UTF_8))) {
+	public void exportarCSV(File destino, List<Persona> lista) throws IOException {
+		try (BufferedWriter bw = Files.newBufferedWriter(destino.toPath(), java.nio.charset.StandardCharsets.UTF_8)) {
 			bw.write("ID;NOMBRE;TELEFONO;EMAIL;CATEGORIA;FAVORITO\n");
-			for (persona p : lista) {
+			for (Persona p : lista) {
 				bw.write(p.datosContacto() + "\n");
 			}
 		}

@@ -1,7 +1,7 @@
 package modelo;
 
 //Definición de la clase pública "persona"
-public class persona {
+public class Persona {
 	
 	// Declaración de variables privadas de la clase "persona"
 	private int id;
@@ -9,7 +9,7 @@ public class persona {
 	private boolean favorito;
 	
 	// Constructor público de la clase "persona"
-	public persona() {
+	public Persona() {
 		super(); // Llama al constructor de la clase base (Object)
 		//Inicializa las variables
 		this.id = 0;
@@ -20,7 +20,7 @@ public class persona {
 		this.favorito = false;
 	}
 	// Constructor público de la clase "persona" que inicializa todos los campos
-	public persona(int id, String nombre, String telefono, String email, String categoria, boolean favorito) {
+	public Persona(int id, String nombre, String telefono, String email, String categoria, boolean favorito) {
 		super();// Llama al constructor de la clase base (Object)
 		//Inicializa las variables con los valores enviados por los argumentos
 		this.id = id;
@@ -98,3 +98,4 @@ public class persona {
 	}
 
 }
+

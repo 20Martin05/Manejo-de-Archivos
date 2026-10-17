@@ -3,7 +3,7 @@ package vista;
 import java.awt.EventQueue;
 import javax.swing.JFrame;
 
-import controlador.logica_ventana;
+import controlador.LogicaVentana;
 import vista.base.VentanaUI;
 
 public class ventana extends VentanaUI {
@@ -48,6 +48,6 @@ public class ventana extends VentanaUI {
 		}
 
 		// Instance el controlador para usar el delegado
-        new logica_ventana(this);
+        new LogicaVentana(this);
     }
 }
