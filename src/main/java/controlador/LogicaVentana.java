@@ -8,6 +8,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -25,6 +27,7 @@ import modelo.*;
 
 //Definición de la clase lógica_ventana que implementa tres interfaces para manejar eventos.
 public class LogicaVentana implements ActionListener, ListSelectionListener, ItemListener {
+	private static final Logger LOGGER = Logger.getLogger(LogicaVentana.class.getName());
 	private final ventana delegado; // Referencia a la ventana principal que contiene la GUI.
 	private String nombres, email, telefono, categoria=""; // Variables para almacenar datos del contacto.
     private List<Persona> contactos; // Lista de objetos persona que representa todos los contactos.
@@ -235,7 +238,6 @@ public class LogicaVentana implements ActionListener, ListSelectionListener, Ite
 			actualizarTabla(contactos);
 
 			barraProgreso();
-			delegado.barra.setValue(contactos.size());
 
 		} catch (IOException e) {
 			// Muestra un mensaje de error si ocurre una excepción al cargar los contactos.
@@ -471,6 +473,35 @@ public class LogicaVentana implements ActionListener, ListSelectionListener, Ite
 		delegado.barra.setMinimum(0);
 		delegado.barra.setMaximum(totalContacto);
 		delegado.barra.setValue(0);
+
+		if (totalContacto == 0) {
+			delegado.barra.setString("No hay contactos para cargar");
+			return;
+		}
+
+		Thread hiloProgreso = new Thread(() -> {
+			long inicio = System.nanoTime();
+			for (int progreso = 1; progreso <= totalContacto; progreso++) {
+				final int valor = progreso;
+				final long tiempoTranscurrido = (System.nanoTime() - inicio) / 1_000_000;
+				SwingUtilities.invokeLater(() -> {
+					delegado.barra.setValue(valor);
+					delegado.barra.setString(valor + "/" + totalContacto
+							+ " contactos - " + tiempoTranscurrido + " ms");
+				});
+
+				try {
+					Thread.sleep(25);
+				} catch (InterruptedException ex) {
+					Thread.currentThread().interrupt();
+					LOGGER.log(Level.WARNING, "La carga visual de contactos fue interrumpida", ex);
+					return;
+				}
+			}
+		}, "barra-progreso-contactos");
+
+		hiloProgreso.setDaemon(true);
+		hiloProgreso.start();
 	}
 
 	public String calcularYMostrarEstadisticas(List<Persona> contactos) {

@@ -15,6 +15,8 @@ El desarrollo aplica el patrón de arquitectura **MVC (Modelo-Vista-Controlador)
 * **Optimización de Memoria (I/O):** Uso de `BufferedReader` y `BufferedWriter` para operaciones de lectura y escritura a alta velocidad.
 * **Codificación UTF-8:** Lectura y escritura de datos con UTF-8 para conservar tildes y caracteres especiales.
 * **Interfaz de Usuario (Swing):** Vista estilo tabla con ordenamiento, filtrado y selección de contactos.
+* **Organización por pestañas:** Uso de `JTabbedPane` para separar las pestañas de Contactos y Estadísticas.
+* **Barra de progreso:** Uso de `JProgressBar` para indicar la cantidad de contactos cargados.
 * **Menú Contextual:** Menú con clic derecho sobre la tabla para modificar o eliminar el contacto seleccionado.
 * **Atajos de Teclado:** Acceso rápido a las operaciones principales mediante combinaciones de teclas.
 * **Validación de datos:** Control de campos obligatorios, nombres, teléfonos, correos electrónicos y categorías.
@@ -107,6 +109,17 @@ Esta pantalla permite consultar, limpiar y exportar el reporte estadístico de l
 ---
 
 ### 🚀 Instrucciones de Uso
+
+### ✅ Requisitos de la actividad
+
+La aplicación cumple con las funcionalidades solicitadas:
+
+* **JTabbedPane:** organiza la interfaz en las pestañas **Contactos** y **Estadísticas**.
+* **Eventos de teclado y mouse:** incluye atajos con `InputMap`/`ActionMap`, selección de filas y menú contextual con clic derecho mediante `JPopupMenu`.
+* **JTable:** muestra los contactos y permite ordenarlos desde los encabezados y filtrarlos mediante el campo de búsqueda en todas sus columnas.
+* **Exportación CSV:** permite exportar los contactos registrados a un archivo `.csv`.
+* **JProgressBar:** muestra el total de contactos cargados al iniciar la aplicación.
+* **MVC:** separa el modelo (`Persona`), el acceso a datos (`PersonaDAO`), el controlador (`LogicaVentana`) y la vista (`ventana` y `VentanaUI`).
 
 #### ¿Cómo ejecutar el programa?
 1. Abre el proyecto en tu IDE favorito.
